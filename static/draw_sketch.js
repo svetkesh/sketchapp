@@ -31,10 +31,36 @@ var dragRect = false;
 var dragRectX = new Array();
 var dragRectY = new Array();
 
+// corners
+var rectNWX = 0;
+var rectNWY = 0;
+var rectSEX = 0;
+var rectSEY = 0;
+var distanceFromCorner = 40; // 5 px from in any direction
+var drugCorner = "";
+var drugCornerIX = 0;
+var drugCornerIY = 0;
+var drugCornerW = 0;
+var drugCornerH = 0;
+
+
 // colors
 var paint = false;
 var curColor = "#FF5733";
 var crectColor = "#3357ff";
+
+function checkNear(pointX, pointY, mouseX, mouseY) {
+    return ((pointX - mouseX) **2 + (pointY - mouseY) **2) < distanceFromCorner **2
+}
+
+
+// $('#canvas').addEventListener('touchstart', process_touchstart, false);
+// $('#canvas').addEventListener('touchmove', process_touchmove, false);
+// $('#canvas').addEventListener('touchcancel', process_touchcancel, false);
+// $('#canvas').addEventListener('touchend', process_touchend, false);
+
+
+
 
 /**
  - Preparing the Canvas : Basic functions
@@ -59,14 +85,53 @@ function drawCanvas() {
     };
     img.src = '/static/bg.png'; // img.src = 'https://mdn.mozillademos.org/files/5395/backdrop.png';
 
+
+    // $('#canvas').addEventListener('touchstart', touchEvent, false);
+    // $('#canvas').addEventListener('touchmove', touchEvent, false);
+    // $('#canvas').addEventListener('touchcancel', touchEvent, false);
+    // $('#canvas').addEventListener('touchend', touchEvent, false);
+
+    function touchstart(e) {
+        e.preventDefault();
+        console.log("Im touch")
+    }
+
+
+    function touchEvent(e) {
+        e.preventDefault();
+        console.log("Im touch")
+    }
+
+
     $('#canvas').mousedown(function (e) {
         var mouseX = e.pageX - this.offsetLeft;
         var mouseY = e.pageY - this.offsetTop;
 
         paint = true;
 
-        // // resetRect = true;
+        // count current corners
+        rectNWX = Math.min(rectIX, rectIX + rectW);
+        rectNWY = Math.min(rectIY, rectIY + rectH);
+
+        rectSEX = Math.max(rectIX, rectIX + rectW);
+        rectSEY = Math.max(rectIY, rectIY + rectH);
+
+        // checkNear(rectNWX, rectNWY, mouseX, mouseY)
+        // checkNear(rectSEX, rectSEY, mouseX, mouseY)
+
+        //
         if (
+            checkNear(rectNWX, rectNWY, mouseX, mouseY)
+        ) {
+            console.log("catch corner rectNW");
+            console.log(rectNWX, rectNWY, mouseX, mouseY, distanceFromCorner);
+
+            dragRect = false;
+            drugCorner = "NW";
+            drugCornerIX = mouseX;
+            drugCornerIY = mouseY;
+
+        } else  if (
             // mouseX < rectX[0] || mouseX > rectX[rectX.length - 1] //|| mouseY < rectY[0] || mouseY < rectY[rectY.length - 1]
             mouseX < Math.min(rectIX, rectIX + rectW)
             || mouseX > Math.max(rectIX, rectIX + rectW) //|| mouseY < rectY[0] || mouseY < rectY[rectY.length - 1]
@@ -74,14 +139,14 @@ function drawCanvas() {
             || mouseY > Math.max(rectIY, rectIY + rectH)
 
         ) {
-            console.log("reset rect");
+            // console.log("reset rect");
             dragRect = false;
             rectIX = mouseX;
             rectIY = mouseY;
             drugIX = drugX;
             drugIY = drugY;
         } else {
-            console.log("reset drag");
+            // console.log("reset drag");
             dragRect = true;
             drugIX = mouseX;
             drugIY = mouseY;
@@ -94,6 +159,7 @@ function drawCanvas() {
     });
 
     $('#canvas').mousemove(function (e) {
+    // $('#canvas').touchmove(function (e) {
         if (paint) {
             addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
             redraw();
@@ -103,6 +169,17 @@ function drawCanvas() {
     $('#canvas').mouseup(function (e) {
         paint = false;
         dragRect = false;
+        drugCorner = "";
+
+        // rearrange rect
+        rectIX = Math.min(rectIX, rectIX + rectW);
+        rectIY = Math.min(rectIY, rectIY + rectH);
+
+        rectW = Math.abs(rectW);
+        rectH = Math.abs(rectH);
+        drugCornerW = 0;
+        drugCornerH = 0;
+
     });
 }
 
@@ -111,30 +188,29 @@ function drawCanvas() {
  **/
 function addClick(x, y, dragging) {
     // console.log("dragRect")
-    console.log(dragRect)
+    // console.log(dragRect)
 
     clickX.push(x);
     clickY.push(y);
     clickDrag.push(dragging);
 
-    if (dragRect) {
+    if (drugCorner === "NW") {
+        rectIX = x;
+        rectIY = y;
+        drugCornerW = (x - drugCornerIX);
+        drugCornerH = (y - drugCornerIY);
+        // rectH = rectH - (y - drugCornerIY);
+
+    }
+
+    else if (dragRect) {
         drugX = x;
         drugY = y;
-        // rectIX += drugX - drugIX;
-        // rectIY += drugY - drugIY;
 
     } else {
         rectW = x - rectIX;
         rectH = y - rectIY;
     }
-
-
-    // clickDragRectX.push(x);
-    // clickDragRectY.push(y);
-
-    // if (dragRect){
-    //
-    // }
 }
 
 /**
@@ -160,24 +236,21 @@ function redraw() {
     context.strokeStyle = crectColor;
     // console.log(rectX[0], clickY[0], rectX[rectX.length - 1], clickY[clickY.length -1 ]);
 
-    // dragRectX, dragRectY
-    if (dragRect){
-        dragRectX = clickDragRectX[clickDragRectX.length - 1] - clickDragRectX[0]
-        dragRectY = clickDragRectY[clickDragRectY.length - 1] - clickDragRectY[0]
-    } else {
-        dragRectX = 0
-        dragRectY = 0
-    }
+    // // dragRectX, dragRectY
+    // if (dragRect){
+    //     dragRectX = clickDragRectX[clickDragRectX.length - 1] - clickDragRectX[0]
+    //     dragRectY = clickDragRectY[clickDragRectY.length - 1] - clickDragRectY[0]
+    // } else {
+    //     dragRectX = 0
+    //     dragRectY = 0
+    // }
 
     context.rect(
         rectIX + (drugX - drugIX),
         rectIY + (drugY - drugIY),
-        rectW,
-        rectH
-        // rectX[0] + dragRectX,
-        // rectY[0] + dragRectY,
-        // rectX[rectX.length - 1] - rectX[0] - dragRectX,
-        // rectY[rectY.length -1 ] - rectY[0] - dragRectY
+        rectW - drugCornerW,
+        rectH - drugCornerH,
+
     );
     context.stroke();
 

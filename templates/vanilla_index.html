@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Drawing App</title>
+  <title>Wanilla Drawing App</title>
   <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js"></script>
   <!--    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles_draw.css') }}">-->
   <!--    <script type="text/javascript" src="{{ url_for('static', filename='draw.js') }}"></script>-->
-  <script type="text/javascript" src="{{ url_for('static', filename='draw_sketch.js') }}"></script>
+<!--  <script type="text/javascript" src="{{ url_for('static', filename='draw_sketch.js') }}"></script>-->
+
+  <script type="text/javascript" src="{{ url_for('static', filename='vanilla.js') }}"></script>
 
 </head>
 <header>
@@ -14,24 +16,15 @@
 
 </header>
 
-<body>
+<body  onload="init();">
 <form id="sketchForm" action="{{ url_for('get_image')}}" method="POST" enctype="multipart/form-data">
-  <canvas id="sketch" , name="sketch" width="400" height="400">
-    <script type="text/javascript">
-        $(document).ready(function () {
-            drawSmileCanvas();
-        });
+  <canvas id="sketch" name="sketch" width="400" height="400"  style="touch-action:none;">
+    <script>
+      drawBGImage ();
     </script>
 
   </canvas>
-
-  <canvas id="canvas" , name="canvas" width="400" height="400">
-    <script type="text/javascript">
-        $(document).ready(function () {
-            drawCanvas();
-        });
-    </script>
-  </canvas>
+  <br>
 
 
   <input type="hidden" id='url' name="url" value="">
