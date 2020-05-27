@@ -1,35 +1,28 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Wanilla Drawing App</title>
-  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js"></script>
-  <!--    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles_draw.css') }}">-->
-  <!--    <script type="text/javascript" src="{{ url_for('static', filename='draw.js') }}"></script>-->
-<!--  <script type="text/javascript" src="{{ url_for('static', filename='draw_sketch.js') }}"></script>-->
+{% extends "base_sketch.html" %}
 
-  <script type="text/javascript" src="{{ url_for('static', filename='vanilla.js') }}"></script>
-
-</head>
-<header>
-  Drawing App
-
-</header>
-
-<body  onload="init();">
-<form id="sketchForm" action="{{ url_for('get_image')}}" method="POST" enctype="multipart/form-data">
-  <canvas id="sketch" name="sketch" width="400" height="400"  style="touch-action:none;">
-    <script>
-      drawBGImage ();
-    </script>
-
-  </canvas>
-  <br>
+{% block content %}
 
 
-  <input type="hidden" id='url' name="url" value="">
-  <input type="submit" id='predict' value="Predict" onclick="return save();">
-</form>
+{% if file_name %}
+<div align="center">
+  <img src="{{ url_for('display_image', filename=file_name) }}">
+  <form id="sketchresult" action="{{ url_for('index')}}">
+    <input type="submit" class="btn btn-primary" id='refresh' value="New">
+  </form>
+</div>
 
-</body>
-</html>
+{% else %}
+<div align="center">
+  <form id="sketchForm" action="{{ url_for('index')}}" method="POST" enctype="multipart/form-data">
+    <canvas id="sketch" name="sketch" style="touch-action:none;" width="400" height="400">
+      <script>
+          drawBGImage();
+      </script>
+    </canvas>
+    <br>
+    <input type="hidden" id='url' name="url" value="">
+    <input type="submit" class="btn btn-primary" id='send_sketch' value="Save" onclick="return save();">
+  </form>
+</div>
+{% endif %}
+{% endblock %}

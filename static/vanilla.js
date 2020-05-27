@@ -5,6 +5,7 @@ var mouseY;
 // context
 var canvas;
 var context;
+var showOnlyRect = false;
 
 // red dots
 var clickX = new Array();
@@ -16,7 +17,7 @@ var clickDrag = new Array();
 var rectIX = 0;
 var rectIY = 0;
 var rectW = 0;
-var rectH= 0;
+var rectH = 0;
 var rectX = new Array();
 var rectY = new Array();
 
@@ -24,7 +25,7 @@ var rectY = new Array();
 var drugIX = 0;
 var drugIY = 0;
 var drugX = 0;
-var drugY= 0;
+var drugY = 0;
 
 var clickDragRectX = new Array();
 var clickDragRectY = new Array();
@@ -38,7 +39,7 @@ var rectNWX = 0;
 var rectNWY = 0;
 var rectSEX = 0;
 var rectSEY = 0;
-var distanceFromCorner = 40; // 5 px from in any direction
+var distanceFromCorner = 10; // 5 px from in any direction
 var drugCorner = "";
 var drugCornerIX = 0;
 var drugCornerIY = 0;
@@ -49,10 +50,10 @@ var drugCornerH = 0;
 // colors
 var paint = false;
 var curColor = "#FF5733";
-var crectColor = "#3357ff";
+var rectColor = "#3357ff";
 
 function checkNear(pointX, pointY, mouseX, mouseY) {
-    return ((pointX - mouseX) **2 + (pointY - mouseY) **2) < distanceFromCorner **2
+    return ((pointX - mouseX) ** 2 + (pointY - mouseY) ** 2) < distanceFromCorner ** 2
 }
 
 /**
@@ -61,6 +62,9 @@ function checkNear(pointX, pointY, mouseX, mouseY) {
 function redraw() {
 
     context.clearRect(0, 0, context.canvas.width, context.canvas.height); // Clears the canvas
+
+    // re-draw path
+
     context.strokeStyle = curColor;
     context.lineJoin = "round";
     context.lineWidth = 3;
@@ -75,24 +79,19 @@ function redraw() {
         context.closePath();
         context.stroke();
     }
-    context.strokeStyle = crectColor;
-    // console.log(rectX[0], clickY[0], rectX[rectX.length - 1], clickY[clickY.length -1 ]);
-
-    // // dragRectX, dragRectY
-    // if (dragRect){
-    //     dragRectX = clickDragRectX[clickDragRectX.length - 1] - clickDragRectX[0]
-    //     dragRectY = clickDragRectY[clickDragRectY.length - 1] - clickDragRectY[0]
-    // } else {
-    //     dragRectX = 0
-    //     dragRectY = 0
+    // if (showOnlyRect) {
+    //     context.clearRect(0, 0, context.canvas.width, context.canvas.height); // Clears the canvas
     // }
+
+    // re-draw rect , showOnlyRect
+
+    context.strokeStyle = rectColor;
 
     context.rect(
         rectIX + (drugX - drugIX),
         rectIY + (drugY - drugIY),
         rectW - drugCornerW,
         rectH - drugCornerH,
-
     );
     context.stroke();
 
@@ -116,9 +115,7 @@ function addClick(x, y, dragging) {
         drugCornerH = (y - drugCornerIY);
         // rectH = rectH - (y - drugCornerIY);
 
-    }
-
-    else if (dragRect) {
+    } else if (dragRect) {
         drugX = x;
         drugY = y;
 
@@ -126,6 +123,37 @@ function addClick(x, y, dragging) {
         rectW = x - rectIX;
         rectH = y - rectIY;
     }
+}
+
+
+/**
+ - Encodes the image into a base 64 string.
+ - Add the string to an hidden tag of the form so Flask can reach it.
+ **/
+function save() {
+
+    // console.log('save running')
+    // clear red lines
+    // redraw();
+
+    // showOnlyRect = true;
+
+    // context.clearRect(0, 0, context.canvas.width, context.canvas.height); // Clears the canvas
+    // context.strokeStyle = crectColor;
+    // context.rect(
+    //     rectIX + (drugX - drugIX),
+    //     rectIY + (drugY - drugIY),
+    //     rectW - drugCornerW,
+    //     rectH - drugCornerH,
+    // );
+    // context.stroke();
+
+    var image = new Image();
+    var url = document.getElementById('url');
+    image.id = "pic";
+    image.src = canvas.toDataURL();
+    url.value = image.src;
+
 }
 
 
@@ -137,84 +165,88 @@ function enter_handler(event) {
 
 function down_handler(e) {
 
-        var mouseX = e.pageX - this.offsetLeft;
-        var mouseY = e.pageY - this.offsetTop;
+    var mouseX = e.pageX - this.offsetLeft;
+    var mouseY = e.pageY - this.offsetTop;
 
-        paint = true;
+    // // clear red lines
+    // clickX = [];
+    // clicky = [];
 
-        // count current corners
-        rectNWX = Math.min(rectIX, rectIX + rectW);
-        rectNWY = Math.min(rectIY, rectIY + rectH);
+    paint = true;
+    showOnlyRect = false;
 
-        rectSEX = Math.max(rectIX, rectIX + rectW);
-        rectSEY = Math.max(rectIY, rectIY + rectH);
+    // count current corners
+    rectNWX = Math.min(rectIX, rectIX + rectW);
+    rectNWY = Math.min(rectIY, rectIY + rectH);
 
-        // checkNear(rectNWX, rectNWY, mouseX, mouseY)
-        // checkNear(rectSEX, rectSEY, mouseX, mouseY)
+    rectSEX = Math.max(rectIX, rectIX + rectW);
+    rectSEY = Math.max(rectIY, rectIY + rectH);
 
-        //
-        if (
-            checkNear(rectNWX, rectNWY, mouseX, mouseY)
-        ) {
-            console.log("catch corner rectNW");
-            console.log(rectNWX, rectNWY, mouseX, mouseY, distanceFromCorner);
+    // checkNear(rectNWX, rectNWY, mouseX, mouseY)
+    // checkNear(rectSEX, rectSEY, mouseX, mouseY)
 
-            dragRect = false;
-            drugCorner = "NW";
-            drugCornerIX = mouseX;
-            drugCornerIY = mouseY;
+    //
+    if (
+        checkNear(rectNWX, rectNWY, mouseX, mouseY)
+    ) {
+        console.log("catch corner rectNW");
+        console.log(rectNWX, rectNWY, mouseX, mouseY, distanceFromCorner);
 
-        } else  if (
-            // mouseX < rectX[0] || mouseX > rectX[rectX.length - 1] //|| mouseY < rectY[0] || mouseY < rectY[rectY.length - 1]
-            mouseX < Math.min(rectIX, rectIX + rectW)
-            || mouseX > Math.max(rectIX, rectIX + rectW) //|| mouseY < rectY[0] || mouseY < rectY[rectY.length - 1]
-            || mouseY < Math.min(rectIY, rectIY + rectH)
-            || mouseY > Math.max(rectIY, rectIY + rectH)
+        dragRect = false;
+        drugCorner = "NW";
+        drugCornerIX = mouseX;
+        drugCornerIY = mouseY;
 
-        ) {
-            // console.log("reset rect");
-            dragRect = false;
-            rectIX = mouseX;
-            rectIY = mouseY;
-            drugIX = drugX;
-            drugIY = drugY;
-        } else {
-            // console.log("reset drag");
-            dragRect = true;
-            drugIX = mouseX;
-            drugIY = mouseY;
-        }
+    } else if (
+        // mouseX < rectX[0] || mouseX > rectX[rectX.length - 1] //|| mouseY < rectY[0] || mouseY < rectY[rectY.length - 1]
+        mouseX < Math.min(rectIX, rectIX + rectW)
+        || mouseX > Math.max(rectIX, rectIX + rectW) //|| mouseY < rectY[0] || mouseY < rectY[rectY.length - 1]
+        || mouseY < Math.min(rectIY, rectIY + rectH)
+        || mouseY > Math.max(rectIY, rectIY + rectH)
+
+    ) {
+        // console.log("reset rect");
+        dragRect = false;
+        rectIX = mouseX;
+        rectIY = mouseY;
+        drugIX = drugX;
+        drugIY = drugY;
+    } else {
+        // console.log("reset drag");
+        dragRect = true;
+        drugIX = mouseX;
+        drugIY = mouseY;
+    }
 
 
-
-        addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
-        redraw();
+    addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
+    redraw();
 
 }
 
 function move_handler(e) {
-            if (paint) {
-            addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
-            redraw();
-        }
+
+    if (paint) {
+        addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
+        redraw();
+    }
 }
 
 function up_handler(e) {
 
-        paint = false;
-        dragRect = false;
-        drugCorner = "";
+    paint = false;
+    dragRect = false;
+    drugCorner = "";
 
-        // rearrange rect
-        rectIX = Math.min(rectIX, rectIX + rectW);
-        rectIY = Math.min(rectIY, rectIY + rectH);
+    // rearrange rect
+    rectIX = Math.min(rectIX, rectIX + rectW);
+    rectIY = Math.min(rectIY, rectIY + rectH);
 
-        rectW = Math.abs(rectW);
-        rectH = Math.abs(rectH);
-        drugCornerW = 0;
-        drugCornerH = 0;
+    rectW = Math.abs(rectW);
+    rectH = Math.abs(rectH);
+    drugCornerW = 0;
+    drugCornerH = 0;
 
-        console.log(e)
 }
 
 function cancel_handler(event) {
@@ -263,11 +295,19 @@ function init() {
     el.lostpointercapture = generalHandler;
 }
 
-function drawBGImage () {
+function drawBGImage() {
+
+
     console.log("drawBGImage")
 
     canvas = document.getElementById('sketch');
     context = canvas.getContext('2d');
+
+    // var canvasSize = Math.min(window.innerWidth, window.innerHeight);
+    canvas.setAttribute('width', 400);
+    // canvas.setAttribute('height', window.innerHeight);
+    canvas.setAttribute('height', 400);
+
 
     var img = new Image();
     img.src = '/static/bg.png';
