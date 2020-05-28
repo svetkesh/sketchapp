@@ -70,21 +70,20 @@ function init() {
     // el.onpointerleave = leave_handler;
     // el.gotpointercapture = gotcapture_handler;
     // el.lostpointercapture = lostcapture_handler;
-
-    el.onpointerover = generalHandler;
-    el.onpointerenter = generalHandler;
+    // el.onpointerover = generalHandler;
+    // el.onpointerenter = generalHandler;
     // el.onpointerdown = generalHandler;
     // el.onpointermove = generalHandler;
     // el.onpointerup = generalHandler;
-    el.onpointercancel = generalHandler;
-    el.onpointerout = generalHandler;
-    el.onpointerleave = generalHandler;
-    el.gotpointercapture = generalHandler;
-    el.lostpointercapture = generalHandler;
+    // el.onpointercancel = generalHandler;
+    // el.onpointerout = generalHandler;
+    // el.onpointerleave = generalHandler;
+    // el.gotpointercapture = generalHandler;
+    // el.lostpointercapture = generalHandler;
 }
 
-function checkNear(pointX, pointY, mousex, mousey) {
-    return ((pointX - mousex) ** 2 + (pointY - mousey) ** 2) < distanceFromCorner ** 2
+function checkNear(pointx, pointy, mousex, mousey) {
+    return ((pointx - mousex) ** 2 + (pointy - mousey) ** 2) < distanceFromCorner ** 2
 }
 
 function checkOutside(mousex, mousey) {
@@ -347,6 +346,15 @@ function up_handler(e) {
 
     rect_w = Math.abs(rect_w);
     rect_h = Math.abs(rect_h);
+
+    if (isNaN(rect_ix) || isNaN(rect_iy) || isNaN(rect_w) || isNaN(rect_h) ) {
+        console.log("rect became  NaN");
+        rect_ix = 0;
+        rect_iy = 0;
+        rect_w = 0;
+        rect_h = 0;
+        console.log("rect restored to zero");
+    }
     
     console.log("rect rearrenged to: ", rect_ix, rect_iy, rect_w, rect_h)
 
@@ -394,26 +402,35 @@ function drawBGImage() {
     canvas = document.getElementById('sketch');
     context = canvas.getContext('2d');
 
-    // var canvasSize = Math.min(window.innerWidth, window.innerHeight);
-    canvas.setAttribute('width', 400);
+
+
+    var canvasSize = Math.floor(0.75 * Math.min(window.innerWidth, window.innerHeight));
+    canvas.setAttribute('width', canvasSize);
     // canvas.setAttribute('height', window.innerHeight);
-    canvas.setAttribute('height', 400);
+    canvas.setAttribute('height', canvasSize);
+
 
 
     var img = new Image();
     img.src = '/static/bg.png';
 
     img.onload = function () {
-        // context.fillStyle = "#f5f5dc";
+        // context.fillStyle = "rgb(184,171,105)";
         // context.fillRect(0, 0, canvas.width, canvas.height);
-        context.drawImage(img, 0, 0);
+
+        context.fillStyle = "rgba(232,230,215,0.5)";
+        // context.fillStyle = "#FF0000";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        // context.drawImage(img, 0, 0);
+
         // ctx.drawImage(img, 0, 0);
         // ctx.beginPath();
         // ctx.moveTo(30, 96);
         // ctx.lineTo(70, 66);
         // ctx.lineTo(103, 76);
         // ctx.lineTo(170, 15);
-        // ctx.stroke();
+        ctx.stroke();
     };
     // img.src = '/static/bg.png'; // img.src = 'https://mdn.mozillademos.org/files/5395/backdrop.png';
 }
